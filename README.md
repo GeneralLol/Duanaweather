@@ -16,6 +16,6 @@ To create a piece of software that is able to pull weather information and displ
  Currently this project only supports Linux. It is made and tested on Ubuntu. Other distros have not been tested. Windows will totally not work unless the pahts and command prompt commands in the python files are changed to adapt to the system. 
 
  ## Current Issues:
- Currently the display module is still not added, and is not worked into the Central Module yet. So dar it is only updating the weather and the time. 
+ There is still no adaptations for a physical display. Also the Virtual Display is made using pygame, which takes a lot of sys resources. Considering about switching to PyQt. 
  
  The Calendar Module is still work in progress. 
