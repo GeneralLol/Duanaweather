@@ -1,7 +1,8 @@
 #Probably going to add a shebang
 from subprocess import Popen
-import time, sys, os#, termios, tty	#Those commented libs are used for keystroke recognition.
+import time, sys, os, platform
 
+OS = platform.system()
 set_time_interval    = 1				#Interval between every update of time
 set_weather_interval = 200				#Interval between every update of weather
 #The WeatherModule will be called once in 20 mins, the TimeModule will be called every second. The Display Module will be started at the start of the program according to the arguments specified and refresh itself.
@@ -14,7 +15,6 @@ def TimeModule():
 
 def VirtualDisplay():
 	Popen(['python3 modules/VirtualDisplay.py'], shell = True)
-
 
 #This chunk is to decide which display module to pull up.
 args = sys.argv
@@ -34,19 +34,21 @@ if len(args) == 4:		#If there are 4 arguments, the 2nd and 3rd is the city and t
 	#Has to close or the city and state file will not update
 	city_file.close()
 	state_file.close()
+try:
+	if args[1] == '-vd': 		#If the 1st argument is -vd pull up Virtual Display Module
+		VirtualDisplay()
+		sig = True
 
-if args[1] == '-vd': 		#If the 1st argument is -vd pull up Virtual Display Module
-	VirtualDisplay()
-	sig = True
+	elif args[1] == '-h':		#If the argument is -h then pull up help file.
+		help_file_raw = open('Help', 'r')
+		help_file     = help_file_raw.read()
+		print(help_file)
+		sig = False
 
-elif args[1] == '-h':		#If the argument is -h then pull up help file.
-	help_file_raw = open('Help', 'r')
-	help_file     = help_file_raw.read()
-	print(help_file)
-	sig = False
-
-else:
-	sig = False
+	else:
+		sig = False
+		print('Ha ha ha, dab dab dab, wrong arguments. Please use -h to get help.')
+except:
 	print('Ha ha ha, dab dab dab, wrong arguments. Please use -h to get help.')
 
 #Those two variables store the interval between the last and the current trigger of the time and weather modules.
