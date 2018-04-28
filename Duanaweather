@@ -1,10 +1,12 @@
 #Probably going to add a shebang
 from subprocess import Popen
-import time, sys, os, platform
+import time, sys, os, platform, datetime
 
 OS = platform.system()
+
 set_time_interval    = 1				#Interval between every update of time
 set_weather_interval = 200				#Interval between every update of weather
+
 #The WeatherModule will be called once in 20 mins, the TimeModule will be called every second. The Display Module will be started at the start of the program according to the arguments specified and refresh itself.
 
 def WeatherModule():
@@ -13,12 +15,14 @@ def WeatherModule():
 def TimeModule():
 	Popen(['python3 modules/TimeModule.py'], shell = True)
 
+def CalendarModule():
+	Popen(['python modules/CalendarModule.py'], shell = True)
+
 def VirtualDisplay():
 	Popen(['python3 modules/VirtualDisplay.py'], shell = True)
 
 #This chunk is to decide which display module to pull up.
 args = sys.argv
-sig = True
 
 #If number of arguments is wrong, skip the while loop and end everything.
 if len(args) == 4:		#If there are 4 arguments, the 2nd and 3rd is the city and the state.
@@ -44,11 +48,11 @@ try:
 		help_file     = help_file_raw.read()
 		print(help_file)
 		sig = False
-
 	else:
 		sig = False
 		print('Ha ha ha, dab dab dab, wrong arguments. Please use -h to get help.')
 except:
+	sig = False
 	print('Ha ha ha, dab dab dab, wrong arguments. Please use -h to get help.')
 
 #Those two variables store the interval between the last and the current trigger of the time and weather modules.
@@ -79,7 +83,6 @@ while sig:
 	#interval_weather records the current time from the last trigger of WeatherModule.
 	interval_time    = current_time-timeCache
 	interval_weather = current_time-weatherCache
-	#key = getch()
 
 	#This if clause is triggered once every second to update the time, resets the time counter and updates the time
 	if (interval_time >= set_time_interval):
@@ -94,6 +97,21 @@ while sig:
 		WeatherModule()
 		interval_weather = 0
 		weatherCache = current_time
+
+	#This chunk decides whether or not to pull up calendar module
+	t_refresh_file = open('cache/CalendarRefresh')
+	t_refresh = float(t_refresh_file.read())
+	t_refresh_file.close()
+	now = datetime.datetime.utcnow().isoformat() + 'Z'
+	utc_time = datetime.datetime.strptime(now, "%Y-%m-%dT%H:%M:%S.%fZ")
+	epoch = datetime.datetime.utcfromtimestamp(0)
+	secs_ref = float((utc_time-epoch).total_seconds())
+	if secs_ref >= t_refresh:
+	   CalendarModule()
+	else:
+	   pass
+
+
 
 	#Checks flag. If the flag is 0, end everything.
 	flag_raw = open('cache/runFlag')

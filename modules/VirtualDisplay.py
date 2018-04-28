@@ -1,14 +1,17 @@
 import pygame, os, sys
 from pygame.locals import *
-from time import sleep
+import time
 
 #Actual program
+dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+data_dir = dir + '/data'
+icon_dir = dir + '/icon.jpg'
 pygame.init()
 font = pygame.font.SysFont('roboto', 40)
 #x and y are dimensions of the window.
 x = 500
 y = 309
-icon   = pygame.image.load('icon.jpg')
+icon   = pygame.image.load(icon_dir)
 pygame.display.set_icon(icon)
 screen = pygame.display.set_mode((x,y))	#Sets the size
 
@@ -27,20 +30,21 @@ def set_window():
 #Adds the time.
 def display_time():
 
+	time_dir = data_dir + '/Time'
 	try:
-		date_time_file = open('data/Time'   , 'r')
+		date_time_file = open(time_dir   , 'r')
 	except FileNotFoundError:
 		return
 
 	date_time      = date_time_file.readlines()
 	#If clause: If time file is empty(created by 'open'), skip this function.
 	try:
-		if os.stat('data/Time').st_size == 0:
+		if os.stat(time_dir).st_size == 0:
 			return
 	except FileNotFoundError:
 		return
 
-	#Try to load the date and time in, if it doesn't work skip this round. 	
+	#Try to load the date and time in, if it doesn't work skip this round.
 	try:
 		date = date_time[0]
 		time = date_time[1]
@@ -61,14 +65,15 @@ def display_time():
 
 def display_weather():
 
+	weather_dir = data_dir + '/Weather'
 	try:
-		city_weather_file = open('data/Weather', 'r')
+		city_weather_file = open(weather_dir, 'r')
 	except FileNotFoundError:
 		return
 
 	city_weather      = city_weather_file.readlines()
 	#If clause: If weather file is empty, skip this function.
-	if os.stat('data/Weather').st_size == 0:
+	if os.stat(weather_dir).st_size == 0:
 		return
 
 	city        = city_weather[0]
@@ -90,6 +95,24 @@ def display_weather():
 
 	pygame.display.flip()
 
+def display_block():
+	block_dir = data_dir + '/Block'
+	try:
+		block_file = open(block_dir, 'r')
+	except:
+		return
+
+	block = block_file.read()
+	block_file.close()
+
+	font = pygame.font.SysFont('roboto', 40)
+	block_label1 = font.render('Next Block is: ', 1, (255, 255, 255))
+	font = pygame.font.SysFont('roboto', 160)
+	block_label2 = font.render(block            , 1, (255, 255, 255))
+	screen.blit(block_label1, (5  , 150))
+	screen.blit(block_label2, (200, 150))
+	pygame.display.flip()
+
 def reset_window():
 	background = pygame.Surface(screen.get_size())
 	background = background.convert()
@@ -99,26 +122,40 @@ def reset_window():
 	pygame.display.flip()						#Refreshes the window
 
 #Initial check to see if to run the module or not.
-flag_raw = open('cache/runFlag')
+runFlag_dir = dir+'/cache/runFlag'
+flag_raw = open(runFlag_dir)
 flag = flag_raw.readlines()
 flag_raw.close()
 if flag[0] == '0':
-	sys.exit()
+	quit()
 
 set_window()
+reset_window()
+display_time()
+display_weather()
+display_block()
 #Try-except used to detect keystrokes and to quit the program.
+refresh_interval = 1.5
+past_time    = time.clock()
+current_time = time.clock()
+interval = current_time - past_time
 while True:
-	reset_window()
-	display_time()
-	display_weather()
+	current_time = time.clock()
+	interval = current_time - past_time
+	if interval >= refresh_interval:
+		reset_window()
+		display_time()
+		display_weather()
+		display_block()
+		past_time = current_time
 	#Check whether the flag is still up. If flag down, end display.
-	flag_raw = open('cache/runFlag')
+	flag_raw = open(runFlag_dir)
 	flag = flag_raw.readlines()
 	flag_raw.close()
 	for event in pygame.event.get():
 		if event.type == QUIT:
-			os.remove ('cache/runFlag')
-			f = open('cache/runFlag', 'w')
+			os.remove (runFlag_dir)
+			f = open(runFlag_dir, 'w')
 			f.write('0')
 			f.close()
 			sys.exit()

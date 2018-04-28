@@ -2,9 +2,11 @@ import urllib.request
 import json
 
 import os, sys
-
-city_file  = open('data/City' , 'r')
-state_file = open('data/State', 'r')
+dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+city_dir  = dir + '/data/City'
+state_dir = dir + '/data/State'
+city_file  = open(city_dir , 'r')
+state_file = open(state_dir, 'r')
 city = city_file.read()
 state = state_file.read()
 url = 'http://api.wunderground.com/api/386a8e8ab04d7748/conditions/q/'+state+'/'+city+'.json'
@@ -37,6 +39,7 @@ loc		= location()							#Fetches location
 
 final_str = loc + '\n' + weather + '\n' + temp
 #Makes the final string, outputs something like "Manchester NH, Mostly Cloudy, 4.7℃".
-os.remove('data/Weather')
-f = open('data/Weather', 'w+')
+weather_dir = dir + '/data/Weather'
+os.remove(weather_dir)
+f = open(weather_dir, 'w+')
 f.write(final_str)

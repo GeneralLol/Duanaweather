@@ -1,73 +1,79 @@
-#Only works with Python2
 from __future__ import print_function
-import httplib2
+from apiclient.discovery import build
+from httplib2 import Http
+from oauth2client import file, client, tools
+import datetime, time
 import os
 
-from apiclient import discovery
-from oauth2client import client
-from oauth2client import tools
-from oauth2client.file import Storage
-
-import datetime
-
-try:
-    import argparse
-    flags = argparse.ArgumentParser(parents=[tools.argparser]).parse_args()
-except ImportError:
-    flags = None
-
-# If modifying these scopes, delete your previously saved credentials
-# at ~/.credentials/calendar-python-quickstart.json
+# Setup the Calendar API
 SCOPES = 'https://www.googleapis.com/auth/calendar.readonly'
-CLIENT_SECRET_FILE = 'client_secret.json'
-APPLICATION_NAME = 'Google Calendar API Python Quickstart'
-CalendarID = 'i7vs7cuh27t4kvh0k517tnk3m8fjms11@import.calendar.google.com'
+store = file.Storage('credentials.json')
+creds = store.get()
+if not creds or creds.invalid:
+    flow = client.flow_from_clientsecrets('client_secret.json', SCOPES)
+    creds = tools.run_flow(flow, store)
+service = build('calendar', 'v3', http=creds.authorize(Http()))
+
+# Call the Calendar API
+now = datetime.datetime.utcnow().isoformat() + 'Z' # 'Z' indicates UTC time
+now_ref = time.time()
+calendarid = 'i7vs7cuh27t4kvh0k517tnk3m8fjms11@import.calendar.google.com'
+events_result = service.events().list(calendarId=calendarid, timeMin=now,
+                                      maxResults=60, singleEvents=True,
+                                      orderBy='startTime').execute()
+events = events_result.get('items', [])
+blocks = [None]
+
+if not events:
+    quit()
+
+index = 0
+refresh_index = 0
+start = [None] * 10
+refresh_flag = False
+refresh_counter = True
+for event in events:
+    start[index] = event['start'].get('dateTime', event['start'].get('date'))
+    #If there are 20 chars in start, it's a class. Otherwise it's a homework.
+    if len(start[index]) == 20:
+        blocks.append(event['summary'])
+        refresh_flag = True
+    if refresh_flag and refresh_counter:
+        refresh_index = index
+        refresh_counter = False
+    index += 1
+blocks.pop(0)
 
 
-def get_credentials():
-    """Gets valid user credentials from storage.
+#Final process that isolates the block information from the entire string
+next_block = ''
+flag = False
+for i in blocks[0]:
+    if i == '(':
+        flag = True
+    if i == ')':
+        flag == False
+    if flag:
+        next_block += i
+length = len(next_block)
+next_block = next_block[1:]
+next_block = next_block[:length-2]
 
-    If nothing has been stored, or if the stored credentials are invalid,
-    the OAuth2 flow is completed to obtain the new credentials.
-
-    Returns:
-        Credentials, the obtained credential.
-    """
-    home_dir = os.path.expanduser('~')
-    credential_dir = os.path.join(home_dir, '.credentials')
-    if not os.path.exists(credential_dir):
-        os.makedirs(credential_dir)
-    credential_path = os.path.join(credential_dir,
-                                   'calendar-python-quickstart.json')
-
-    store = Storage(credential_path)
-    credentials = store.get()
-    if not credentials or credentials.invalid:
-        flow = client.flow_from_clientsecrets(CLIENT_SECRET_FILE, SCOPES)
-        flow.user_agent = APPLICATION_NAME
-        if flags:
-            credentials = tools.run_flow(flow, store, flags)
-        else: # Needed only for compatibility with Python 2.6
-            credentials = tools.run(flow, store)
-        print('Storing credentials to ' + credential_path)
-    return credentials
-
-def get_events(): 
-	"""Shows basic usage of the Google Calendar API.
-
-    Creates a Google Calendar API service object and outputs a list of the next
-    10 events on the user's calendar.
-    """
-	credentials = get_credentials()
-	http = credentials.authorize((httplib2.Http())
-    calendar = discovery.build('calendar', 'v3', http=http)
-    
-    now = datetime.datetime.utcnow().isoformat() + 'Z' # 'Z' indicates UTC time
-    #print('Getting the upcoming 10 events')
-    eventsResult = calendar.events().list(
-        calendarId=CalendarID, timeMin=now, maxResults=10, singleEvents=True,
-        orderBy='startTime').execute()
-    events = eventsResult.get('items', [])
-    print (events)
-    
-
+#Write the block info into the cache file
+dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+data_dir = dir + '/data/Block'
+refresh_dir = dir + '/cache/CalendarRefresh'
+try:
+    os.remove(data_dir)
+    os.remove(refresh_dir)
+except:
+    pass
+utc_time = datetime.datetime.strptime(start[refresh_index], "%Y-%m-%dT%H:%M:%SZ")
+epoch = datetime.datetime.utcfromtimestamp(0)
+secs_ref = str((utc_time-epoch).total_seconds())
+f = open(data_dir, 'w')
+f.write(next_block)
+f.close()
+f = open(refresh_dir, 'w')
+f.write(secs_ref)
+quit()
