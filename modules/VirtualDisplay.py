@@ -135,7 +135,7 @@ display_time()
 display_weather()
 display_block()
 #Try-except used to detect keystrokes and to quit the program.
-refresh_interval = 1.5
+refresh_interval = 1
 past_time    = time.clock()
 current_time = time.clock()
 interval = current_time - past_time
@@ -161,3 +161,5 @@ while True:
 			sys.exit()
 	if flag[0] == '0':
 		sys.exit()
+
+	time.sleep(0.1)
