@@ -16,7 +16,7 @@ def TimeModule():
 	Popen(['python3 modules/TimeModule.py'], shell = True)
 
 def CalendarModule():
-	Popen(['python modules/CalendarModule.py'], shell = True)
+	Popen(['python3 modules/CalendarModule.py'], shell = True)
 
 def VirtualDisplay():
 	Popen(['python3 modules/VirtualDisplay.py'], shell = True)
@@ -66,9 +66,10 @@ weatherCache = time.clock_gettime(time.CLOCK_REALTIME)//1
 if sig:
 	print('Please visit https://www.wunderground.com/?apiref=c68c74f9a26733fa to provide me with free API access. Thanks!')
 	print('Ctrl+C to quit the program.')
-	#Update the time and weather before displaying
+	#Update before displaying
 	TimeModule()
 	WeatherModule()
+	CalendarModule()
 
 	#Set the runFlag to 1 so that all other modules will run.
 	os.remove('cache/runFlag')

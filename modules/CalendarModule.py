@@ -1,16 +1,19 @@
-from __future__ import print_function
+#from __future__ import print_function
 from apiclient.discovery import build
 from httplib2 import Http
 from oauth2client import file, client, tools
 import datetime, time
 import os
 
+dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+secret_dir = dir + '/modules/secret.json'
+credentials_dir = dir + '/modules/credentials.json'
 # Setup the Calendar API
 SCOPES = 'https://www.googleapis.com/auth/calendar.readonly'
-store = file.Storage('credentials.json')
+store = file.Storage(credentials_dir)
 creds = store.get()
 if not creds or creds.invalid:
-    flow = client.flow_from_clientsecrets('client_secret.json', SCOPES)
+    flow = client.flow_from_clientsecrets(secret_dir, SCOPES)
     creds = tools.run_flow(flow, store)
 service = build('calendar', 'v3', http=creds.authorize(Http()))
 
@@ -29,7 +32,7 @@ if not events:
 
 index = 0
 refresh_index = 0
-start = [None] * 10
+start = [None] * 60
 refresh_flag = False
 refresh_counter = True
 for event in events:
@@ -48,7 +51,7 @@ blocks.pop(0)
 #Final process that isolates the block information from the entire string
 next_block = ''
 flag = False
-for i in blocks[0]:
+for i in blocks[1]:
     if i == '(':
         flag = True
     if i == ')':
@@ -68,7 +71,7 @@ try:
     os.remove(refresh_dir)
 except:
     pass
-utc_time = datetime.datetime.strptime(start[refresh_index], "%Y-%m-%dT%H:%M:%SZ")
+utc_time = datetime.datetime.strptime(start[refresh_index+1], "%Y-%m-%dT%H:%M:%SZ")
 epoch = datetime.datetime.utcfromtimestamp(0)
 secs_ref = str((utc_time-epoch).total_seconds())
 f = open(data_dir, 'w')
