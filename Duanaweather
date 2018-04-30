@@ -112,8 +112,6 @@ while sig:
 	else:
 	   pass
 
-
-
 	#Checks flag. If the flag is 0, end everything.
 	flag_raw = open('cache/runFlag')
 	flag = flag_raw.readlines()
