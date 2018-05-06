@@ -7,6 +7,15 @@ import os
 
 dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 secret_dir = dir + '/modules/secret.json'
+
+#Decide whether to execute this module from the Runflag file
+runFlag_dir  = dir + '/cache/runFlag'
+runFlag_file = open(runFlag_dir, 'r')
+runFlag = int(runFlag_file.read())
+runFlag_file.close()
+if not runFlag:
+    quit()
+
 credentials_dir = dir + '/modules/credentials.json'
 # Setup the Calendar API
 SCOPES = 'https://www.googleapis.com/auth/calendar.readonly'
