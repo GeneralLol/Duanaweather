@@ -21,9 +21,13 @@ def CalendarModule():
 def VirtualDisplay():
 	Popen(['python3 modules/VirtualDisplay.py'], shell = True)
 
+def OLED():
+	Popen(['python3 modules/I2C_OLED.py'], shell = True)
+
 #This chunk is to decide which display module to pull up.
 args = sys.argv
 
+sig = True
 #If number of arguments is wrong, skip the while loop and end everything.
 if len(args) == 4:		#If there are 4 arguments, the 2nd and 3rd is the city and the state.
 	city  = args[2]
@@ -41,6 +45,10 @@ if len(args) == 4:		#If there are 4 arguments, the 2nd and 3rd is the city and t
 try:
 	if args[1] == '-vd': 		#If the 1st argument is -vd pull up Virtual Display Module
 		VirtualDisplay()
+		sig = True
+	
+	elif args[1] == '-oled':
+		OLED()
 		sig = True
 
 	elif args[1] == '-h':		#If the argument is -h then pull up help file.
@@ -63,20 +71,19 @@ interval_weather = 0
 timeCache    = time.clock_gettime(time.CLOCK_REALTIME)//1
 weatherCache = time.clock_gettime(time.CLOCK_REALTIME)//1
 
-if sig:
-	print('Please visit https://www.wunderground.com/?apiref=c68c74f9a26733fa to provide me with free API access. Thanks!')
-	print('Ctrl+C to quit the program.')
-	#Update before displaying
-	TimeModule()
-	WeatherModule()
-	CalendarModule()
+print('Please visit https://www.wunderground.com/?apiref=c68c74f9a26733fa to provide me with free API access. Thanks!')
+print('Ctrl+C to quit the program.')
+#Update before displaying
+TimeModule()
+#WeatherModule()
+CalendarModule()
 
-	#Set the runFlag to 1 so that all other modules will run.
-	os.remove('cache/runFlag')
-	f = open('cache/runFlag', 'w+')
-	f.write('1')
-	f.close()
-
+#Set the runFlag to 1 so that all other modules will run.
+os.remove('cache/runFlag')
+f = open('cache/runFlag', 'w+')
+f.write('1')
+f.close()
+ 
 while sig:
 	#print('While True Started')			#Print is for plebs/debugging
 	current_time = time.clock_gettime(time.CLOCK_REALTIME)//1
@@ -100,9 +107,11 @@ while sig:
 		weatherCache = current_time
 
 	#This chunk decides whether or not to pull up calendar module
-	t_refresh_file = open('cache/CalendarRefresh')
-	t_refresh = float(t_refresh_file.read())
+	t_refresh_file = open('cache/CalendarRefresh', 'r')
+	t_refresh_str = t_refresh_file.read()
+	t_refresh = float(t_refresh_str)
 	t_refresh_file.close()
+	
 	now = datetime.datetime.utcnow().isoformat() + 'Z'
 	utc_time = datetime.datetime.strptime(now, "%Y-%m-%dT%H:%M:%S.%fZ")
 	epoch = datetime.datetime.utcfromtimestamp(0)
@@ -118,6 +127,5 @@ while sig:
 	if flag[0] == '0':
 		print('Terminating.')
 		sys.exit()
-
 
 	time.sleep(0.5)				#halt for half a second to save sys resources

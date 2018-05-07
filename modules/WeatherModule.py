@@ -13,7 +13,7 @@ url = 'http://api.wunderground.com/api/386a8e8ab04d7748/conditions/q/'+state+'/'
 
 response = urllib.request.urlopen(url)
 
-res = json.load(response)
+res = json.loads(str(response))
 
 if 'error' in res['response'].keys():
 	os.remove('data/Weather')
