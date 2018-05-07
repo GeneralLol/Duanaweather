@@ -75,7 +75,7 @@ print('Please visit https://www.wunderground.com/?apiref=c68c74f9a26733fa to pro
 print('Ctrl+C to quit the program.')
 #Update before displaying
 TimeModule()
-#WeatherModule()
+WeatherModule()
 CalendarModule()
 
 #Set the runFlag to 1 so that all other modules will run.
