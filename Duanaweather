@@ -109,6 +109,13 @@ while sig:
 	#This chunk decides whether or not to pull up calendar module
 	t_refresh_file = open('cache/CalendarRefresh', 'r')
 	t_refresh_str = t_refresh_file.read()
+	t_refresh_file.close()
+	while t_refresh_str == '':
+		t_refresh_file = open('cache/CalendarRefresh', 'r')
+		t_refresh_str = t_refresh_file.read()
+		time.sleep(0.1)
+		t_refresh_file.close()
+		
 	t_refresh = float(t_refresh_str)
 	t_refresh_file.close()
 	
