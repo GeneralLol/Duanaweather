@@ -60,7 +60,7 @@ blocks.pop(0)
 #Final process that isolates the block information from the entire string
 next_block = ''
 flag = False
-for i in blocks[1]:
+for i in blocks[3]:
     if i == '(':
         flag = True
     if i == ')':
