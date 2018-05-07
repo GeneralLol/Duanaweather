@@ -12,8 +12,8 @@ state = state_file.read()
 url = 'http://api.wunderground.com/api/386a8e8ab04d7748/conditions/q/'+state+'/'+city+'.json'
 
 response = urllib.request.urlopen(url)
-
-res = json.loads(str(response))
+response_str = response.read().decode('utf-8')
+res = json.loads(response_str)			#This line is broken
 
 if 'error' in res['response'].keys():
 	os.remove('data/Weather')
